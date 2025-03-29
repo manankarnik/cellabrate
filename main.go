@@ -1,12 +1,15 @@
 package main
 
 import (
+	"time"
+
 	"github.com/gdamore/tcell/v2"
 )
 
 var grid = [][]int{}
 var quit = make(chan bool)
 var cursor = [2]int{0, 0}
+var simulate = false
 
 func main() {
 	screen, err := tcell.NewScreen()
@@ -39,12 +42,15 @@ func main() {
 	grid[width/2][height+1] = 1
 	grid[width/2][height+2] = 1
 	cursor[0] = width / 2
-	cursor[1] = height
+	cursor[1] = height + 1
 	screen.Show()
 
 	go func() {
 		for {
-			update()
+			if simulate {
+				update()
+				time.Sleep(time.Millisecond * 200)
+			}
 			draw(screen, width, height)
 		}
 	}()
@@ -90,6 +96,22 @@ func poll(screen tcell.Screen, width, height int) {
 			case tcell.KeyEscape:
 				close(quit)
 				return
+			case tcell.KeyUp:
+				if cursor[1] > 0 {
+					cursor[1] -= 1
+				}
+			case tcell.KeyLeft:
+				if cursor[0] > 0 {
+					cursor[0] -= 1
+				}
+			case tcell.KeyDown:
+				if cursor[1] < height*2-1 {
+					cursor[1] += 1
+				}
+			case tcell.KeyRight:
+				if cursor[0] < width-1 {
+					cursor[0] += 1
+				}
 			}
 			switch event.Rune() {
 			case 'q':
@@ -111,6 +133,10 @@ func poll(screen tcell.Screen, width, height int) {
 				if cursor[0] < width-1 {
 					cursor[0] += 1
 				}
+			case ' ':
+				grid[cursor[0]][cursor[1]] ^= 1
+			case 'f':
+				simulate = !simulate
 			}
 		}
 	}
@@ -134,14 +160,16 @@ func draw(screen tcell.Screen, width, height int) {
 			screen.SetContent(col, row, ch, nil, style)
 		}
 	}
-	if cursor[1]%2 == 0 {
-		style = style.Foreground(tcell.ColorNone)
-		style = style.Background(tcell.ColorGreen)
-	} else {
-		style = style.Foreground(tcell.ColorGreen)
-		style = style.Background(tcell.ColorNone)
+	if !simulate {
+		if cursor[1]%2 == 0 {
+			style = style.Foreground(tcell.ColorNone)
+			style = style.Background(tcell.ColorRed)
+		} else {
+			style = style.Foreground(tcell.ColorRed)
+			style = style.Background(tcell.ColorNone)
+		}
+		screen.SetContent(cursor[0], cursor[1]/2, ch, nil, style)
 	}
-	screen.SetContent(cursor[0], cursor[1]/2, ch, nil, style)
 	screen.Show()
 }
 
