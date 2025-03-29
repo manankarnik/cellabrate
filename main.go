@@ -1,13 +1,12 @@
 package main
 
 import (
-	"time"
-
 	"github.com/gdamore/tcell/v2"
 )
 
 var grid = [][]int{}
 var quit = make(chan bool)
+var cursor = [2]int{0, 0}
 
 func main() {
 	screen, err := tcell.NewScreen()
@@ -22,12 +21,13 @@ func main() {
 	}
 	defer screen.Fini()
 
-	go poll(screen)
-
 	width, height := screen.Size()
 	if width == 0 || height == 0 {
 		return
 	}
+
+	go poll(screen, width, height)
+
 	for col := range width {
 		grid = append(grid, []int{})
 		for range height * 2 {
@@ -38,13 +38,14 @@ func main() {
 	grid[width/2][height] = 1
 	grid[width/2][height+1] = 1
 	grid[width/2][height+2] = 1
+	cursor[0] = width / 2
+	cursor[1] = height
 	screen.Show()
 
 	go func() {
 		for {
 			update()
 			draw(screen, width, height)
-			time.Sleep(time.Millisecond * 200)
 		}
 	}()
 
@@ -80,7 +81,7 @@ func getNeighbors(row, col int) int {
 	return neighbors
 }
 
-func poll(screen tcell.Screen) {
+func poll(screen tcell.Screen, width, height int) {
 	for {
 		event := screen.PollEvent()
 		switch event := event.(type) {
@@ -94,6 +95,22 @@ func poll(screen tcell.Screen) {
 			case 'q':
 				close(quit)
 				return
+			case 'w':
+				if cursor[1] > 0 {
+					cursor[1] -= 1
+				}
+			case 'a':
+				if cursor[0] > 0 {
+					cursor[0] -= 1
+				}
+			case 's':
+				if cursor[1] < height*2-1 {
+					cursor[1] += 1
+				}
+			case 'd':
+				if cursor[0] < width-1 {
+					cursor[0] += 1
+				}
 			}
 		}
 	}
@@ -117,6 +134,14 @@ func draw(screen tcell.Screen, width, height int) {
 			screen.SetContent(col, row, ch, nil, style)
 		}
 	}
+	if cursor[1]%2 == 0 {
+		style = style.Foreground(tcell.ColorNone)
+		style = style.Background(tcell.ColorGreen)
+	} else {
+		style = style.Foreground(tcell.ColorGreen)
+		style = style.Background(tcell.ColorNone)
+	}
+	screen.SetContent(cursor[0], cursor[1]/2, ch, nil, style)
 	screen.Show()
 }
 
