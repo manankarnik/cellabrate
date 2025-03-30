@@ -141,13 +141,10 @@ func getNeighbors(row, col int) int {
 	return neighbors
 }
 
-func clearGrid(screen tcell.Screen) {
-	width, height := screen.Size()
-	for col := range width {
-		for row := range height * 2 {
-			if grid[col][row] == 1 {
-				grid[col][row] = 0
-			}
+func clearGrid() {
+	for row := range grid {
+		for col := range grid[0] {
+			grid[row][col] &= 0
 		}
 	}
 }
@@ -231,7 +228,7 @@ func poll(screen tcell.Screen) {
 			case 'f':
 				simulate = !simulate
 			case 'c':
-				clearGrid(screen)
+				clearGrid()
 			}
 		}
 	}
