@@ -1,4 +1,4 @@
-module github.com/manankarnik/game-of-life
+module github.com/manankarnik/cellabrate
 
 go 1.24.1
 
