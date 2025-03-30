@@ -10,6 +10,8 @@ var grid = [][]int{}
 var quit = make(chan bool)
 var cursor = [2]int{0, 0}
 var simulate = false
+var paint = false
+var erase = false
 
 func main() {
 	screen, err := tcell.NewScreen()
@@ -44,9 +46,10 @@ func main() {
 	go func() {
 		for {
 			if simulate {
-				update()
+				step()
 				time.Sleep(time.Millisecond * 50)
 			}
+			update(screen)
 			draw(screen)
 		}
 	}()
@@ -58,9 +61,6 @@ func draw(screen tcell.Screen) {
 	width, height := screen.Size()
 	const ch = '▄'
 	style := tcell.StyleDefault
-	if len(grid) < width && len(grid[0]) < height*2 {
-		resizeGrid(width, height)
-	}
 	for col := range width {
 		for row := range height {
 			if grid[col][row*2] == 0 {
@@ -77,11 +77,17 @@ func draw(screen tcell.Screen) {
 		}
 	}
 	if !simulate {
+		activeColor := tcell.ColorBlue
+		if paint {
+			activeColor = tcell.ColorGreen
+		} else if erase {
+			activeColor = tcell.ColorRed
+		}
 		if cursor[1]%2 == 0 {
 			style = style.Foreground(tcell.ColorNone)
-			style = style.Background(tcell.ColorRed)
+			style = style.Background(activeColor)
 		} else {
-			style = style.Foreground(tcell.ColorRed)
+			style = style.Foreground(activeColor)
 			style = style.Background(tcell.ColorNone)
 		}
 		screen.SetContent(cursor[0], cursor[1]/2, ch, nil, style)
@@ -89,7 +95,21 @@ func draw(screen tcell.Screen) {
 	screen.Show()
 }
 
-func update() {
+func update(screen tcell.Screen) {
+	width, height := screen.Size()
+	if len(grid) < width && len(grid[0]) < height*2 {
+		resizeGrid(width, height)
+	}
+	if !simulate {
+		if paint {
+			grid[cursor[0]][cursor[1]] |= 1
+		} else if erase {
+			grid[cursor[0]][cursor[1]] &= 0
+		}
+	}
+}
+
+func step() {
 	neighbors := [][]int{}
 	for row := range grid {
 		neighbors = append(neighbors, []int{})
@@ -181,19 +201,19 @@ func poll(screen tcell.Screen) {
 				close(quit)
 				return
 			case tcell.KeyUp:
-				if cursor[1] > 0 {
+				if !simulate && cursor[1] > 0 {
 					cursor[1] -= 1
 				}
 			case tcell.KeyLeft:
-				if cursor[0] > 0 {
+				if !simulate && cursor[0] > 0 {
 					cursor[0] -= 1
 				}
 			case tcell.KeyDown:
-				if cursor[1] < height*2-1 {
+				if !simulate && cursor[1] < height*2-1 {
 					cursor[1] += 1
 				}
 			case tcell.KeyRight:
-				if cursor[0] < width-1 {
+				if !simulate && cursor[0] < width-1 {
 					cursor[0] += 1
 				}
 			}
@@ -201,32 +221,36 @@ func poll(screen tcell.Screen) {
 			case 'q':
 				close(quit)
 				return
-			case 'w':
-			case 'k':
-				if cursor[1] > 0 {
-					cursor[1] -= 1
-				}
-			case 'a':
 			case 'h':
-				if cursor[0] > 0 {
+				if !simulate && cursor[0] > 0 {
 					cursor[0] -= 1
 				}
-			case 's':
 			case 'j':
-				if cursor[1] < height*2-1 {
+				if !simulate && cursor[1] < height*2-1 {
 					cursor[1] += 1
 				}
-			case 'd':
+			case 'k':
+				if !simulate && cursor[1] > 0 {
+					cursor[1] -= 1
+				}
 			case 'l':
-				if cursor[0] < width-1 {
+				if !simulate && cursor[0] < width-1 {
 					cursor[0] += 1
 				}
 			case ' ':
-				if !simulate {
+				if !simulate && !paint {
 					grid[cursor[0]][cursor[1]] ^= 1
 				}
-			case 'f':
+			case 's':
 				simulate = !simulate
+			case 'n':
+				step()
+			case 'p':
+				paint = !paint
+				erase = false
+			case 'e':
+				erase = !erase
+				paint = false
 			case 'c':
 				clearGrid()
 			}
