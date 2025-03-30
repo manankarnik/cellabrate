@@ -25,22 +25,38 @@ This implementation of Conway's Game of Life follows these rules:
 
 ## Installation
 
-### Clone This Repository
+### Install with Go
+
+#### Go Install
 
 ```bash
-git clone https://github.com/manankarnik/term-life.git
+go install github.com/manankarnik/cellabrate
 ```
 
-### Navigate to the Project Directory
+#### Run Binary
 
 ```bash
-cd term-life
+celebrate
 ```
 
-### Run the Project
+### Clone and Run
+
+#### Clone This Repository
 
 ```bash
-go run term-life
+git clone https://github.com/manankarnik/cellabrate.git
+```
+
+#### Navigate to the Project Directory
+
+```bash
+cd cellabrate
+```
+
+#### Run Cellabrate
+
+```bash
+go run .
 ```
 
 ## Requirements
@@ -114,7 +130,6 @@ Paint mode allows you to "draw" live cells by simply moving the cursor. This mak
 - Press `p` to enter or exit paint mode
 - The cursor will turn green in paint mode
 - Move the cursor to create live cells
-- Paint mode is disabled during simulation
 - **Note**: Paint mode is disabled during simulation, and you cannot use it simultaneously with erase mode.
 
 > TODO: Paint Mode Example
@@ -126,7 +141,6 @@ Erase mode is similar to paint mode but removes cells instead of creating them.
 - Press `e` to enter or exit erase mode
 - The cursor will turn red in erase mode
 - Move the cursor to remove live cells
-- Erase mode is disabled during simulation
 - **Note**: Erase mode is disabled during simulation, and you cannot use it simultaneously with paint mode.
 
 > TODO: Erase Mode Example
