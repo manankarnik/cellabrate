@@ -36,7 +36,7 @@ go install github.com/manankarnik/cellabrate
 #### Run Binary
 
 ```bash
-celebrate
+cellabrate
 ```
 
 ### Clone and Run
