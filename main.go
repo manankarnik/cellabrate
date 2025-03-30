@@ -216,6 +216,38 @@ func poll(screen tcell.Screen) {
 				if !simulate && cursor[0] < width-1 {
 					cursor[0] += 1
 				}
+			case tcell.KeyCtrlF:
+				if !simulate {
+					if cursor[0] < width-6 {
+						cursor[0] += 5
+					} else {
+						cursor[0] = width - 1
+					}
+				}
+			case tcell.KeyCtrlB:
+				if !simulate {
+					if cursor[0] > 6 {
+						cursor[0] -= 5
+					} else {
+						cursor[0] = 0
+					}
+				}
+			case tcell.KeyCtrlU:
+				if !simulate {
+					if cursor[1] > 6 {
+						cursor[1] -= 5
+					} else {
+						cursor[1] = 0
+					}
+				}
+			case tcell.KeyCtrlD:
+				if !simulate {
+					if cursor[1] < height*2-6 {
+						cursor[1] += 5
+					} else {
+						cursor[1] = height*2 - 1
+					}
+				}
 			}
 			switch event.Rune() {
 			case 'q':
@@ -236,6 +268,30 @@ func poll(screen tcell.Screen) {
 			case 'l':
 				if !simulate && cursor[0] < width-1 {
 					cursor[0] += 1
+				}
+			case 'b':
+				if !simulate {
+					cursor[0] = 0
+				}
+			case 'f':
+				if !simulate {
+					cursor[0] = width - 1
+				}
+			case 'u':
+				if !simulate {
+					cursor[1] = 0
+				}
+			case 'd':
+				if !simulate {
+					cursor[1] = height*2 - 1
+				}
+			case 'm':
+				if !simulate {
+					cursor[0] = width / 2
+				}
+			case 'M':
+				if !simulate {
+					cursor[1] = height + 1
 				}
 			case ' ':
 				if !simulate && !paint {
