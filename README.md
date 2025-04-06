@@ -114,6 +114,8 @@ The program has two main modes:
 | --- | -------------------------------------- |
 | s   | Toggle simulation (start/pause)        |
 | n   | Step simulation forward one generation |
+| +   | Speed up simulation                    |
+| -   | Slow down simulation                   |
 
 ### Program Control
 

@@ -12,6 +12,7 @@ var cursor = [2]int{0, 0}
 var simulate = false
 var paint = false
 var erase = false
+var simulationDelay = 100 * time.Millisecond
 
 func main() {
 	screen, err := tcell.NewScreen()
@@ -47,7 +48,7 @@ func main() {
 		for {
 			if simulate {
 				step()
-				time.Sleep(time.Millisecond * 50)
+				time.Sleep(simulationDelay)
 			}
 			update(screen)
 			draw(screen)
@@ -92,6 +93,7 @@ func draw(screen tcell.Screen) {
 		}
 		screen.SetContent(cursor[0], cursor[1]/2, ch, nil, style)
 	}
+	screen.SetContent(0, 0, ' ', []rune(simulationDelay.String()), style)
 	screen.Show()
 }
 
@@ -309,6 +311,14 @@ func poll(screen tcell.Screen) {
 				paint = false
 			case 'c':
 				clearGrid()
+			case '+':
+				if simulate {
+					simulationDelay = max(50*time.Millisecond, simulationDelay-50*time.Millisecond)
+				}
+			case '-':
+				if simulate {
+					simulationDelay = min(200*time.Millisecond, simulationDelay+50*time.Millisecond)
+				}
 			}
 		}
 	}
