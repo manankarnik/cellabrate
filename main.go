@@ -45,7 +45,9 @@ func main() {
 	screen.Show()
 
 	go func() {
-		for {
+		ticker := time.NewTicker(time.Second / 60)
+		defer ticker.Stop()
+		for range ticker.C {
 			if simulate {
 				step()
 				time.Sleep(simulationDelay)
@@ -93,7 +95,6 @@ func draw(screen tcell.Screen) {
 		}
 		screen.SetContent(cursor[0], cursor[1]/2, ch, nil, style)
 	}
-	screen.SetContent(0, 0, ' ', []rune(simulationDelay.String()), style)
 	screen.Show()
 }
 
